@@ -33,3 +33,9 @@ SELECT ps_order_detail.product_id As product_id, ps_customer.firstname As firstn
               INNER JOIN ps_customer ON ps_customer.id_customer = ps_orders.id_customer
               INNER JOIN ps_address ON ps_customer.id_customer = ps_address.id_customer
               WHERE ps_customer.id_customer = 1 AND DATE_FORMAT(ps_orders.date_add,'%Y-%m-%d') > '2019-03-28 06:00:00'
+
+//recup id_customer et id_product apres une certainer date
+"SELECT ps_order_detail.product_id As product_id, ps_orders.id_customer As id_customer
+              FROM ps_order_detail
+              INNER JOIN ps_orders ON ps_orders.id_order = ps_order_detail.id_order
+              WHERE DATE_FORMAT(ps_orders.date_add,'%Y-%m-%d') > '2019-03-26 06:00:00'"
