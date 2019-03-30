@@ -228,7 +228,6 @@ class Wepika extends Module
      */
     public function getRandomOrderDetails()
     {
-
         $image_type = 'home_default';
         $id_lang = Context::getContext()->language->id;
 
@@ -238,30 +237,44 @@ class Wepika extends Module
         $datetime->modify($delay);
         $date = $datetime->format('Y-m-d');
                     //call to database
-        $lastSelling = WepikaManager::getLastSelling($date);
+        $lastSellings = WepikaManager::getLastSelling($date);
 
+        foreach ($lastSellings As $ligne)
+        {
+            foreach ($ligne as $key => $value)
+            {
+                $lastSelling[$key] = $value;
+            }
+        }
                     //get the current date and the date returned by the database to get the day of difference between the two
-        $date1 = new DateTime($lastSelling[0]['date']);
+        $date1 = new DateTime($lastSelling['date']);
         $date2 = new DateTime();
         $diff = $date2->diff($date1);
 
-        $country = CustomerCore::getCurrentCountry($lastSelling[0]['id_customer']);
-        $customerCountry = CountryCore::getNameById($lastSelling[0]['id_lang'],$country);
-        $product = new Product((int)$lastSelling[0]['product_id'], false, $id_lang);
+        $country = CustomerCore::getCurrentCountry($lastSelling['id_customer']);
+        $customerCountry = CountryCore::getNameById($lastSelling['id_lang'],$country);
+        $product = new Product((int)$lastSelling['product_id'], false, $id_lang);
         $img = $product->getCover($product->id);
 
         $img_url = $this->context->link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, (int)$img['id_image'], $image_type);
 
-        $allOrderDetails[] = array(
-            'firstname' => $lastSelling[0]['firstname'],
-            'lastname' => $lastSelling[0]['lastname'],
-            'city' => $lastSelling[0]['city'],
+        $allOrderDetailsMulti[] = array(
+            'firstname' => $lastSelling['firstname'],
+            'lastname' => $lastSelling['lastname'],
+            'city' => $lastSelling['city'],
             'country' => $customerCountry,
             'date' => $diff->format('%a'),
             'name' => ucfirst($product->name),
             'img' => $img_url
         );
 
+        foreach ($allOrderDetailsMulti As $ligne)
+        {
+            foreach ($ligne as $key => $value)
+            {
+                $allOrderDetails[$key] = $value;
+            }
+        }
         return $allOrderDetails;
     }
 

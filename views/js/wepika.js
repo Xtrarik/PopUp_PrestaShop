@@ -10,7 +10,7 @@ const showModal = function (){
         method:'post',
         success: function(data)
         {
-            var modalInfos = JSON.parse(data)[0];
+            var modalInfos = JSON.parse(data);
                     //Simple verification on the firstname and lastname of the last buyer
             if(modalInfos['firstname'] != null && modalInfos['lastname'] != null){
                 $('#customer_firstname').html(modalInfos['firstname']);
@@ -38,4 +38,5 @@ const closeModal = function () {
     $('.modal-wrapper').hide('slow');
 };
 
-
+//$('#frequency').val()
+//$('#visibility_time').val()
