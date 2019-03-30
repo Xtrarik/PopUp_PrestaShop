@@ -117,7 +117,7 @@ class Wepika extends Module
             'input' => array(
                 array(
                     'type' => 'select',
-                    'label' => $this->l('Période ? Intervalle ?'),
+                    'label' => $this->l('Période'),
                     'name' => 'period_of_time',
                     'required' => true,
                     'options' => array(
@@ -203,8 +203,6 @@ class Wepika extends Module
 
     public function hookHeader()
     {
-        $alllastSelling = $this->getRandomOrderDetails();
-
         MediaCore::addJsDef(array(              //getting the path for the Ajax request
             'mp_ajax' => $this->_path.'ajax/ajax.php'
         ));
@@ -221,6 +219,7 @@ class Wepika extends Module
 
         return $this->display(__FILE__, 'wepika.tpl');
     }
+
 
     /**
      * @return array Le tableau détaillé de la vente selection aléatoirement en base de donnée => récupèrer par ajax/ajax.php

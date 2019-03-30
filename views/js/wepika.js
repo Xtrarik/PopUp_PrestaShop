@@ -10,6 +10,7 @@ const showModal = function (){
         method:'post',
         success: function(data)
         {
+            console.log(JSON.parse(data));
             var modalInfos = JSON.parse(data);
                     //Simple verification on the firstname and lastname of the last buyer
             if(modalInfos['firstname'] != null && modalInfos['lastname'] != null){
@@ -38,5 +39,3 @@ const closeModal = function () {
     $('.modal-wrapper').hide('slow');
 };
 
-//$('#frequency').val()
-//$('#visibility_time').val()
