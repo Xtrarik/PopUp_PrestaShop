@@ -68,9 +68,10 @@ class Wepika extends Module
 
     public function displayForm()
     {
-
-        $default_lang = (int)Configuration::get('PS_LANG_DEFAULT'); // Get default Language
-
+        $default_lang = (int)Configuration::get('PS_LANG_DEFAULT');
+        /**
+         *  Creation of values that will be used to fill in the various "SELECT" of the back office
+         */
         $visibility_timer = [];
         for ($i = 5; $i <= 30; $i+=5)
         {
@@ -82,11 +83,11 @@ class Wepika extends Module
 
         $frequency_timer[] =
             array('id_option' => 45,
-                'name' => $this->l('45 secondes')
+                'name' => $this->l('45 secondes')       //first entry defined at 45 seconds
             );
         for ($i = 60; $i <= 1200; $i+=30)
-        {
-            if($i <= 300 || ($i > 300 && $i <= 600 && $i%60 == 0) || ($i > 600 && $i%300 == 0))    // Delays every 30 sec till 300, then 1minutes till 10 minutes, then 5 minutes delays
+        {           // Delays every 30 sec till 300, then 1minutes till 10 minutes and finally 5 minutes  of delays
+            if($i <= 300 || ($i > 300 && $i <= 600 && $i%60 == 0) || ($i > 600 && $i%300 == 0))
                 $frequency_timer[] =
                     array('id_option' => $i,
                           'name' => ($i< 120)?$this->l($i . " secondes"): $this->l((int)($i/60).(($i%60!=0)?" mins ".$i%60 . " sec":" minutes"))
@@ -96,10 +97,10 @@ class Wepika extends Module
 
         $periodSelecter[] = array(
             'id_option' => 1,
-            'name' => $this->l("1 jour")
+            'name' => $this->l("1 jour")            //first entry defined at 1 day
         );
         for ($i = 2; $i <= 90; $i++)
-        {
+        {       // Delays every  day till 15, then 5days till 30 days and finally 30 days of delays
             if($i <=5 || ($i > 5 && $i <= 15 && $i%5 ==0 ) || ($i >30 && $i%30 == 0))
                 $periodSelecter[] = array(
                     'id_option' => $i,
@@ -202,19 +203,14 @@ class Wepika extends Module
 
     public function hookHeader()
     {
+        $alllastSelling = $this->getRandomOrderDetails();
 
-
-        $alllastSelling = $this->getAllOrderDetails();
-
-        MediaCore::addJsDef(array(
-            'mp_ajax' => $this->_path.'ajax/ajax.php',
-            'dataOrder' => $alllastSelling
+        MediaCore::addJsDef(array(              //getting the path for the Ajax request
+            'mp_ajax' => $this->_path.'ajax/ajax.php'
         ));
 
-        $this->context->smarty->assign('myArray', $alllastSelling);
         $this->context->smarty->assign(
             array(
-
                 'visibility_time' => Configuration::get('visibility_time'),
                 'frequency' => Configuration::get('frequency')
             )
@@ -222,72 +218,51 @@ class Wepika extends Module
 
         $this->context->controller->addJS(($this->_path).'views/js/wepika.js', 'all');
         $this->context->controller->addCSS(($this->_path).'views/css/wepika.css', 'all');
+
         return $this->display(__FILE__, 'wepika.tpl');
     }
 
+    /**
+     * @return array Le tableau détaillé de la vente selection aléatoirement en base de donnée => récupèrer par ajax/ajax.php
+     * @throws Exception
+     */
     public function getRandomOrderDetails()
     {
-        $datetime = new DateTime();
-        $delay = '-'.Configuration::get('period_of_time').' day';
-        $datetime ->modify($delay);
-        $date = $datetime->format('Y-m-d');
 
         $image_type = 'home_default';
         $id_lang = Context::getContext()->language->id;
-        $lastSelling = WepikaManager::getLastSelling($date);
 
-            $country = CustomerCore::getCurrentCountry($lastSelling[0]['id_customer']);
-            $customerCountry = CountryCore::getNameById($lastSelling[0]['id_lang'],$country);
-            $product = new Product((int)$lastSelling[0]['product_id'], false, $id_lang);
-            $img = $product->getCover($product->id);
-
-            $img_url = $this->context->link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, (int)$img['id_image'], $image_type);
-
-            $allOrderDetails[] = array(
-                'firstname' => $lastSelling[0]['firstname'],
-                'lastname' => $lastSelling[0]['lastname'],
-                'city' => $lastSelling[0]['city'],
-                'country' => $customerCountry,
-                'date' => $lastSelling[0]['date'],
-                'name' => ucfirst($product->name),
-                'img' => $img_url
-            );
-
-        return $allOrderDetails;
-    }
-    public function getAllOrderDetails()
-    {
+                    //Creation of the date to send as a parameter for the sql request
         $datetime = new DateTime();
         $delay = '-'.Configuration::get('period_of_time').' day';
-        $datetime ->modify($delay);
+        $datetime->modify($delay);
         $date = $datetime->format('Y-m-d');
-
-        $image_type = 'home_default';
-        $id_lang = Context::getContext()->language->id;
+                    //call to database
         $lastSelling = WepikaManager::getLastSelling($date);
 
-        for($i = 0; $i < sizeof($lastSelling)-1; $i++)
-        {
-            $country = CustomerCore::getCurrentCountry($lastSelling[$i]['id_customer']);
-            $customerCountry = CountryCore::getNameById($lastSelling[$i]['id_lang'],$country);
-            $product = new Product((int)$lastSelling[$i]['product_id'], false, $id_lang);
-            $img = $product->getCover($product->id);
+                    //get the current date and the date returned by the database to get the day of difference between the two
+        $date1 = new DateTime($lastSelling[0]['date']);
+        $date2 = new DateTime();
+        $diff = $date2->diff($date1);
 
-            $img_url = $this->context->link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, (int)$img['id_image'], $image_type);
+        $country = CustomerCore::getCurrentCountry($lastSelling[0]['id_customer']);
+        $customerCountry = CountryCore::getNameById($lastSelling[0]['id_lang'],$country);
+        $product = new Product((int)$lastSelling[0]['product_id'], false, $id_lang);
+        $img = $product->getCover($product->id);
 
-            $allOrderDetails[] = array(
-                'firstname' => $lastSelling[$i]['firstname'],
-                'lastname' => $lastSelling[$i]['lastname'],
-                'city' => $lastSelling[$i]['city'],
-                'country' => $customerCountry,
-                'date' => $lastSelling[$i]['date'],
-                'name' => ucfirst($product->name),
-                'img' => $img_url
-            );
-        }
+        $img_url = $this->context->link->getImageLink(isset($product->link_rewrite) ? $product->link_rewrite : $product->name, (int)$img['id_image'], $image_type);
+
+        $allOrderDetails[] = array(
+            'firstname' => $lastSelling[0]['firstname'],
+            'lastname' => $lastSelling[0]['lastname'],
+            'city' => $lastSelling[0]['city'],
+            'country' => $customerCountry,
+            'date' => $diff->format('%a'),
+            'name' => ucfirst($product->name),
+            'img' => $img_url
+        );
 
         return $allOrderDetails;
     }
-
 
 }

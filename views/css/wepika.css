@@ -1,6 +1,7 @@
 *{
     box-sizing: border-box;
 }
+
 .modal {
     position : fixed;
     bottom : 25px;
@@ -20,7 +21,6 @@
 }
 .modal-wrapper img{
     height: 100px;
-
 }
 
 .modal-wrapper  {
@@ -29,13 +29,17 @@
 p:first-child {
     margin-top: 14px;
 }
+
 .color_black {
     color: #0e0e0e;
 }
+
 .bolder {
     font-weight: bold;
-    font-size: 0.9em;
+    font-size: 1em;
+    letter-spacing: .05rem;
 }
+
 .color_grey {
     color: #3A3A3A;
     font-size: 1.1em;

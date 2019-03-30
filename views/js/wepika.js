@@ -1,39 +1,43 @@
 $(document).ready(function () {
-    //setInterval("openModal()", 5* 1000 );
-    setInterval( "letsgo()", 5* 1000 );
-
+            //start of the modal window appearance sequence - value recovered thanks to the hidden input of wepika.tpl
+    setInterval( "showModal()", 5 * 1000 );
 });
 
-const letsgo = function (){
+const showModal = function (){
     $.ajax({
         url: mp_ajax,
-        data:{} ,
+        data:{},
         method:'post',
         success: function(data)
         {
-            var modalInfos = JSON.parse(data)[Math.floor(Math.random()*JSON.parse(data).length)];
-            $('#customer_firstname').html(modalInfos['firstname']);
-            $('#product_name').html(modalInfos['name']);
-            $('#product_img').attr('src', modalInfos['img']);
-            openModal()
+            var modalInfos = JSON.parse(data)[0];
+                    //Simple verification on the firstname and lastname of the last buyer
+            if(modalInfos['firstname'] != null && modalInfos['lastname'] != null){
+                $('#customer_firstname').html(modalInfos['firstname']);
+                $('#customer_lastname').html(modalInfos['lastname']);
+                $('#country').html(modalInfos['country']);
+                $('#city').html(modalInfos['city']);
+                $('#product_name').html(modalInfos['name']);
+                $('#date').html((modalInfos['date'] <= 1)? modalInfos['date']+" jour" :modalInfos['date']+ " jours");
+                $('#product_img').attr('src', modalInfos['img']);
+                        //call the modal window
+                openModal();
+            }
+
         }
     });
-}
+};
 
 const openModal = function () {
-
-
     $('.modal-wrapper').show('slow', function(){
-        setTimeout("closeModal()", 3 * 1000 )
+        setTimeout("closeModal()", 3 * 1000 )       //value recovered thanks to the hidden input of wepika.tpl
     });
-}
+};
 
 const closeModal = function () {
     $('.modal-wrapper').hide('slow');
-}
-$(document).ready(function() {
+};
 
-});
 
 // $(document).ready(function () {
 //     setInterval("openModal()", $('#frequency').val() * 1000 );
