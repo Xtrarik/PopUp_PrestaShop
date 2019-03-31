@@ -203,6 +203,12 @@ class Wepika extends Module
 
     public function hookHeader()
     {
+        if(!isset($this->context->cookie->frequency) || $this->context->cookie->frequency < time())
+        {
+            $this->context->cookie->__set('frequency',time()+Configuration::get('frequency'));
+        }
+
+
         MediaCore::addJsDef(array(              //getting the path for the Ajax request
             'mp_ajax' => $this->_path.'ajax/ajax.php'
         ));
@@ -210,7 +216,7 @@ class Wepika extends Module
         $this->context->smarty->assign(
             array(
                 'visibility_time' => Configuration::get('visibility_time'),
-                'frequency' => Configuration::get('frequency')
+                'frequency' => $this->context->cookie->frequency - time()
             )
         );
 
