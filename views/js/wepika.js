@@ -1,6 +1,6 @@
 $(document).ready(function () {
             //start of the modal window appearance sequence - value recovered thanks to the hidden input of wepika.tpl
-    setInterval( "showModal()", $('#frequency').val() * 1000 );
+    setInterval( "showModal()", 5 * 1000 );
 });
 
 const showModal = function (){
@@ -31,7 +31,7 @@ const showModal = function (){
 
 const openModal = function () {
     $('.modal-wrapper').show('slow', function(){
-        setTimeout("closeModal()", $('#visibility_time').val() * 1000 )       //value recovered thanks to the hidden input of wepika.tpl
+        setTimeout("closeModal()", 2 * 1000 )       //value recovered thanks to the hidden input of wepika.tpl
     });
 };
 
@@ -39,3 +39,5 @@ const closeModal = function () {
     $('.modal-wrapper').hide('slow');
 };
 
+// $('#frequency').val()
+// $('#visibility_time').val()

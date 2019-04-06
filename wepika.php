@@ -24,7 +24,6 @@ class Wepika extends Module
         $this->displayName = $this->l('Wepika Pop Up');
         $this->description = $this->l('Affichage sur le front office d\'une popub indiquant qu\'une commande à eu lieu récemment');
 
-        require_once('models/WepikaManager.php');
     }
 
     public function install()
@@ -94,7 +93,6 @@ class Wepika extends Module
                     );
         }
 
-
         $periodSelecter[] = array(
             'id_option' => 1,
             'name' => $this->l("1 jour")            //first entry defined at 1 day
@@ -107,7 +105,6 @@ class Wepika extends Module
                     'name' => $this->l($i . " jours")
                 );
         }
-
 
         // Init Fields form array
         $fields_form[0]['form'] = array(
@@ -208,7 +205,6 @@ class Wepika extends Module
             $this->context->cookie->__set('frequency',time()+Configuration::get('frequency'));
         }
 
-
         MediaCore::addJsDef(array(              //getting the path for the Ajax request
             'mp_ajax' => $this->_path.'ajax/ajax.php'
         ));
@@ -242,7 +238,7 @@ class Wepika extends Module
         $datetime->modify($delay);
         $date = $datetime->format('Y-m-d');
                     //call to database
-        $lastSellings = WepikaManager::getLastSelling($date);
+        $lastSellings = $this->getLastSelling($date);
 
         foreach ($lastSellings As $ligne)
         {
@@ -281,6 +277,26 @@ class Wepika extends Module
             }
         }
         return $allOrderDetails;
+    }
+
+    /**
+     * @param $date receives a date formatting like '%Y-%m-%d'
+     * @return array containing a single random value between the current date and the one sent in parameter
+     */
+    public static function getLastSelling($date)
+    {
+        $p = _DB_PREFIX_;   //get the prefix variable for more flexibility
+
+        $sql = "SELECT ".$p."customer.id_customer As id_customer, ".$p."customer.id_lang As id_lang, ".$p."order_detail.product_id As product_id, ".$p."customer.firstname As firstname, ".$p."customer.lastname As lastname, ".$p."address.city AS city, DATE_FORMAT(".$p."orders.date_add,'%d-%m-%Y') As date
+              FROM ".$p."order_detail
+              INNER JOIN ".$p."orders ON ".$p."orders.id_order = ".$p."order_detail.id_order
+              INNER JOIN ".$p."customer ON ".$p."customer.id_customer = ".$p."orders.id_customer
+              INNER JOIN ".$p."address ON ".$p."orders.id_address_delivery = ".$p."address.id_address
+              WHERE DATE_FORMAT(".$p."orders.date_add,'%Y-%m-%d') > '" . $date . " 00:00:00'
+              ORDER BY RAND()
+              Limit 0,1";
+
+        return Db::getInstance()->ExecuteS($sql);
     }
 
 }
